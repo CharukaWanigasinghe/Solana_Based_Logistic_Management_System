@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}B TO B INTELICCA Logistics{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/dark-theme.css') }}">
+    <!-- Tailwind via CDN for rapid theming -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#6366f1',
+              'primary-dark': '#4f46e5',
+              'primary-light': '#a5b4fc',
+              secondary: '#10b981',
+              accent: '#0ea5e9',
+              neutral: '#64748b',
+              base: '#0f172a',
+              info: '#3b82f6',
+              success: '#22c55e',
+              warning: '#eab308',
+              error: '#ef4444'
+            }
+          }
+        }
+      }
+    </script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="flex justify-between items-center px-4 py-3 bg-slate-800">
+        <h1 class="text-xl font-semibold text-white">B To B INTELLICA</h1>
+        {% if request.session.wallet %}
+        <div class="text-slate-200">
+            {{ request.session.wallet[:4] }}...{{ request.session.wallet[-4:] }}
+            <a href="/logout" class="ml-4 text-sm text-primary hover:underline">Logout</a>
+        </div>
+        {% endif %}
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2026 B TO B INTELICCA Logistics</p>
+    </footer>
+    <script src="{{ url_for('static', path='js/animations.js') }}"></script>
+</body>
+</html>

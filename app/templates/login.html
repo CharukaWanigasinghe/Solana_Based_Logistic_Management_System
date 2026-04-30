@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Connect Wallet - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-slate-900">
+  <div class="w-full max-w-md p-8 space-y-6 bg-slate-800 rounded-lg shadow-xl">
+    <h2 class="text-2xl font-bold text-white text-center">Connect Your Phantom Wallet</h2>
+    <p class="text-slate-300 text-center">Use your Phantom wallet to login to the INTELLICA Logistics dashboard.</p>
+    <button id="connectBtn" class="w-full py-2 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-primary-light">
+      Connect Wallet
+    </button>
+    <p id="status" class="text-center text-sm text-slate-400 mt-4"></p>
+    <script>
+      async function connectWallet() {
+        const statusEl = document.getElementById('status');
+        try {
+          // Check for Phantom wallet in multiple ways
+          const phantomProvider = window.phantom?.solana || window.solana;
+          
+          if (!phantomProvider) {
+            statusEl.textContent = 'Phantom wallet not found. Installing...';
+            setTimeout(() => {
+              window.open('https://phantom.app/download', '_blank');
+            }, 1500);
+            alert('Please install Phantom wallet from phantom.app and then refresh this page.');
+            return;
+          }
+          
+          if (!phantomProvider.isPhantom) {
+            alert('Please use Phantom wallet extension. Found a different provider.');
+            return;
+          }
+          
+          statusEl.textContent = 'Connecting to Phantom...';
+          const response = await phantomProvider.connect();
+          const pubkey = response.publicKey.toString();
+          
+          statusEl.textContent = 'Connected! Logging in...';
+          
+          // send public key to server to set session
+          const res = await fetch('/wallet_login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ public_key: pubkey })
+          });
+          if (res.ok) {
+            statusEl.textContent = 'Redirecting to dashboard...';
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 500);
+          } else {
+            statusEl.textContent = 'Login failed. Please try again.';
+            alert('Login failed. Please try again.');
+          }
+        } catch (err) {
+          console.error('Wallet connection error:', err);
+          statusEl.textContent = 'Error: ' + err.message;
+          alert('Connection error: ' + err.message);
+        }
+      }
+      
+      // Check if Phantom is available when page loads
+      window.addEventListener('load', function() {
+        const statusEl = document.getElementById('status');
+        const phantomProvider = window.phantom?.solana || window.solana;
+        if (phantomProvider && phantomProvider.isPhantom) {
+          statusEl.textContent = 'Phantom wallet detected ✓';
+        } else {
+          statusEl.textContent = 'Phantom wallet not detected';
+        }
+      });
+      
+      document.getElementById('connectBtn').addEventListener('click', connectWallet);
+    </script>
+  </div>
+</div>
+{% endblock %}

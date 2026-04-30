@@ -1,0 +1,29 @@
+[toolchain]
+# Anchor framework version
+anchor_version = "0.29.0"
+
+[build]
+shell = "bash"
+# Set shell to PowerShell on Windows if bash is not available
+# shell = "powershell"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+build = "cargo build-sbf --manifest-path=Cargo.toml --sbf-out-dir=target/deploy"
+test = "cargo test"
+
+[programs.devnet]
+intellica_logistics_program = "YOUR_PROGRAM_ID_HERE"
+
+[[test.genesis]]
+address = "YOUR_PROGRAM_ID_HERE"
+program = "path/to/program"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider.test]
+anchor_cli_version = "0.29.0"

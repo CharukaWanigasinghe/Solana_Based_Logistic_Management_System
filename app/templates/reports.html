@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen">
+    <div class="w-full max-w-xl p-10 space-y-6 bg-slate-800 bg-opacity-90 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-bold text-white text-center">B To B INTELLICA Reports</h2>
+        <p class="text-slate-300 text-center">Generate and download comprehensive real-time reports on deliveries and sales performance.</p>
+
+        <div class="report-options text-center space-y-4">
+            <p class="text-slate-400">Your report is being generated. If the download doesn't start automatically, click the button below.</p>
+            <a href="/reports/generate" class="inline-block py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">Generate the Report</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Automatically trigger the report download when the page loads
+    window.onload = function() {
+        window.location.href = '/reports/generate';
+    };
+</script>
+{% endblock %}

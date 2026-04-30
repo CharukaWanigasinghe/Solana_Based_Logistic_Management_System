@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}B To B INTELLICA Logistics{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen">
+    <div class="w-full max-w-xl p-10 space-y-6 bg-slate-800 bg-opacity-90 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-bold text-white text-center">Welcome to B To B INTELLICA Logistics</h2>
+        <p class="text-slate-300 text-center">B To B INTELLICA Logistics helps you track real time deliveries, generate real-time reports and previous reports.</p>
+        <p class="text-slate-400 text-center italic">Let's Roll</p>
+
+        <form action="/select_service" method="post" class="flex flex-col items-center gap-4">
+            <label for="service" class="text-slate-200 font-semibold">Select a Service:</label>
+            <select name="service" id="service" required class="p-2 rounded border border-primary bg-slate-900 text-slate-200 w-full max-w-md">
+                <option value="">-- Choose a service --</option>
+                {% for service in services %}
+                <option value="{{ service.name }}">{{ service.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="py-2 px-6 bg-primary hover:bg-primary-dark text-white rounded font-semibold">Search Service</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

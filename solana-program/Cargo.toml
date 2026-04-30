@@ -1,0 +1,23 @@
+[package]
+name = "intellica-logistics-program"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anchor-lang = "0.28"
+anchor-spl = "0.28"
+solana-program = "1.17"
+
+[dev-dependencies]
+anchor-client = "0.28"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[profile.release]
+overflow-checks = true
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0

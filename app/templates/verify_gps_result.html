@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}GPS Verification Result - INTELLICA{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+  <div class="section">
+    <div class="flex items-center justify-center mb-4">
+      {% if gps_data.get('integrity_verified') %}
+        <h2 class="text-3xl font-bold text-success">✅ GPS Data Integrity Verified</h2>
+      {% else %}
+        <h2 class="text-3xl font-bold text-error">❌ GPS Data Integrity Failed</h2>
+      {% endif %}
+    </div>
+    
+    <!-- Verification Result -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 {% if gps_data.get('integrity_verified') %}border border-green-500{% else %}border border-red-500{% endif %}">
+      <h3 class="text-xl font-bold {% if gps_data.get('integrity_verified') %}text-green-400{% else %}text-red-400{% endif %} mb-4">
+        {% if gps_data.get('integrity_verified') %}
+          🔐 Verification Successful
+        {% else %}
+          ⚠️ Verification Failed
+        {% endif %}
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-200 mb-4">
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Shipment ID:</label>
+          <p class="text-lg font-bold text-primary">{{ gps_data.get('shipment_id', 'N/A') }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Verification Time:</label>
+          <p class="text-lg font-bold">{{ gps_data.get('timestamp', 'N/A') }}</p>
+        </div>
+      </div>
+
+      <div class="{% if gps_data.get('integrity_verified') %}bg-green-900 text-green-100{% else %}bg-red-900 text-red-100{% endif %} rounded p-4">
+        <p class="text-sm font-bold mb-1">{{ gps_data.get('message', 'Verification result unavailable') }}</p>
+        <p class="text-xs mt-2">
+          {% if gps_data.get('integrity_verified') %}
+            The GPS coordinates you provided match the hash stored on the blockchain, confirming data integrity.
+          {% else %}
+            The GPS coordinates do not match the blockchain hash. This indicates a mismatch or potential tampering.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- GPS Coordinates Verified -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-blue-500">
+      <h3 class="text-xl font-bold text-blue-400 mb-4">🌍 Verified GPS Coordinates</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-200 mb-4">
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Latitude:</label>
+          <p class="text-lg font-bold">{{ "%.6f"|format(gps_data.get('latitude', 0)) }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Longitude:</label>
+          <p class="text-lg font-bold">{{ "%.6f"|format(gps_data.get('longitude', 0)) }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4 md:col-span-2">
+          <label class="text-sm text-slate-400">Verification Timestamp:</label>
+          <p class="text-lg font-bold">{{ gps_data.get('verification_timestamp', 'N/A') }}</p>
+        </div>
+      </div>
+
+      <div class="bg-blue-900 text-blue-100 rounded p-4">
+        <p class="text-sm"><strong>📍 Location Data:</strong> These coordinates have been verified against the blockchain hash to confirm authenticity and prevent spoofing</p>
+      </div>
+    </div>
+
+    <!-- Blockchain Hash Verification -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-purple-500">
+      <h3 class="text-xl font-bold text-purple-400 mb-4">🔐 Blockchain Hash Verification</h3>
+      
+      {% if gps_data.get('stored_hash') %}
+        <div class="bg-slate-800 rounded p-4 mb-4">
+          <label class="text-sm text-slate-400">Blockchain Stored Hash:</label>
+          <p class="text-xs font-mono text-green-300 break-all">{{ gps_data.get('stored_hash') }}</p>
+        </div>
+      {% endif %}
+
+      {% if gps_data.get('calculated_hash') %}
+        <div class="bg-slate-800 rounded p-4 mb-4">
+          <label class="text-sm text-slate-400">Calculated Hash (from provided data):</label>
+          <p class="text-xs font-mono text-slate-300 break-all">{{ gps_data.get('calculated_hash') }}</p>
+        </div>
+      {% endif %}
+
+      <div class="{% if gps_data.get('integrity_verified') %}bg-purple-900 text-purple-100{% else %}bg-red-900 text-red-100{% endif %} rounded p-4">
+        <p class="text-sm">
+          {% if gps_data.get('integrity_verified') %}
+            <strong>✓ Hash Match:</strong> The hash calculated from the provided GPS coordinates matches the blockchain record, confirming data integrity.
+          {% else %}
+            <strong>✗ Hash Mismatch:</strong> The hash does not match. The coordinates may have been altered or are incorrect.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Security Information -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-orange-500">
+      <h3 class="text-xl font-bold text-orange-400 mb-4">🛡️ Security & Integrity Assurance</h3>
+      
+      <div class="space-y-3">
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-green-500">
+          <p class="text-sm text-slate-200 mb-1"><strong>✓ Cryptographic Hashing:</strong></p>
+          <p class="text-xs text-slate-400">GPS data is hashed using SHA-256 (or similar) to create a unique fingerprint. Any change to the coordinates would result in a completely different hash</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-blue-500">
+          <p class="text-sm text-slate-200 mb-1"><strong>✓ Blockchain Immutability:</strong></p>
+          <p class="text-xs text-slate-400">Once stored on Solana, the hash cannot be modified or deleted. The blockchain serves as a tamper-proof witness to the original data</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-purple-500">
+          <p class="text-sm text-slate-200 mb-1"><strong>✓ GPS Spoofing Prevention:</strong></p>
+          <p class="text-xs text-slate-400">This verification method prevents GPS spoofing attacks by requiring exact coordinate matches to the blockchain hash</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-yellow-500">
+          <p class="text-sm text-slate-200 mb-1"><strong>✓ Timestamp Proof:</strong></p>
+          <p class="text-xs text-slate-400">The blockchain timestamp proves these GPS coordinates existed at a specific point in time, preventing backdating</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Result Details -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-cyan-500">
+      <h3 class="text-xl font-bold text-cyan-400 mb-4">📊 Detailed Verification Report</h3>
+      
+      <div class="bg-slate-800 rounded p-4 space-y-3">
+        {% for key, value in gps_data.items() %}
+          {% if key not in ['shipment_id', 'latitude', 'longitude', 'timestamp', 'message', 'integrity_verified'] %}
+            <div class="flex justify-between items-start border-b border-slate-700 pb-2 last:border-b-0">
+              <span class="text-slate-400 text-sm capitalize">{{ key.replace('_', ' ') }}:</span>
+              <span class="text-slate-200 text-sm font-mono">{{ value }}</span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- GPS Tampering Detection -->
+    {% if not gps_data.get('integrity_verified') %}
+      <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-red-500">
+        <h3 class="text-xl font-bold text-red-400 mb-4">🚨 Tampering Alert</h3>
+        
+        <div class="bg-red-900 text-red-100 rounded p-4 space-y-2">
+          <p class="text-sm font-bold">GPS Data Integrity Check Failed</p>
+          <p class="text-xs mb-3">The GPS coordinates you provided do not match the hash stored on the blockchain.</p>
+          
+          <div class="text-xs space-y-1">
+            <p><strong>Possible Causes:</strong></p>
+            <ul class="list-disc ml-5 space-y-1">
+              <li>Incorrect GPS coordinates were entered</li>
+              <li>GPS data was modified after blockchain recording</li>
+              <li>GPS spoofing or location spoofing attack detected</li>
+              <li>Wrong shipment ID was used for verification</li>
+              <li>GPS drift or accuracy issues beyond tolerance</li>
+            </ul>
+          </div>
+
+          <div class="bg-red-800 rounded p-2 mt-3">
+            <p class="text-xs"><strong>Recommendation:</strong> Check the exact GPS coordinates from your GPS device and try verification again. If the problem persists, investigate potential tampering or GPS signal issues.</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-4">
+      <a href="/blockchain/tracking" class="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">
+        ← Back to Dashboard
+      </a>
+      <a href="/blockchain/tracking" class="px-6 py-3 bg-secondary hover:bg-green-600 text-white rounded-lg font-semibold transition-colors duration-200">
+        Verify Another GPS
+      </a>
+      <button onclick="window.print()" class="px-6 py-3 bg-accent hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200">
+        📄 Print Report
+      </button>
+    </div>
+
+    <!-- Important Information -->
+    <div class="mt-6 bg-slate-900 border-l-4 {% if gps_data.get('integrity_verified') %}border-success{% else %}border-error{% endif %} rounded p-6">
+      <h4 class="font-bold {% if gps_data.get('integrity_verified') %}text-success{% else %}text-error{% endif %} mb-2">
+        {% if gps_data.get('integrity_verified') %}
+          ✓ Verification Successful
+        {% else %}
+          ⚠️ Verification Failed
+        {% endif %}
+      </h4>
+      <ul class="text-sm text-slate-300 space-y-2">
+        <li><strong>Verification Method:</strong> Cryptographic hash comparison against Solana blockchain records</li>
+        <li><strong>Security Level:</strong> {% if gps_data.get('integrity_verified') %}High - Data confirmed authentic{% else %}Alert - Data mismatch detected{% endif %}</li>
+        <li><strong>Blockchain Reference:</strong> This verification is cryptographically tied to the Solana blockchain</li>
+        <li><strong>Permanent Record:</strong> All GPS verification attempts are logged on the blockchain for audit purposes</li>
+        <li><strong>Next Steps:</strong> {% if gps_data.get('integrity_verified') %}Data is confirmed authentic. You can proceed with confidence.{% else %}Investigate the mismatch and resubmit with correct coordinates.{% endif %}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .welcome-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .section {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .section {
+      padding: 1rem;
+    }
+
+    .welcome-container {
+      margin: 1rem auto;
+    }
+  }
+
+  @media print {
+    .welcome-container {
+      margin: 0;
+    }
+
+    .section {
+      page-break-inside: avoid;
+    }
+  }
+</style>
+
+{% endblock %}

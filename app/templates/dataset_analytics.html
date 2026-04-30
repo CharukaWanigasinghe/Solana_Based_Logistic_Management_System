@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Dataset Analytics - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section>
+  <div class="card">
+    <h1 class="hero-title">Dataset Analytics</h1>
+    <div class="mt-4 grid grid-cols-4 gap-4">
+      <div class="card"><div class="small-muted">Brands</div><div class="text-xl font-bold">56</div></div>
+      <div class="card"><div class="small-muted">Customers</div><div class="text-xl font-bold">8</div></div>
+      <div class="card"><div class="small-muted">Products</div><div class="text-xl font-bold">56</div></div>
+      <div class="card"><div class="small-muted">Total Qty</div><div class="text-xl font-bold text-green-400">1.1K</div></div>
+    </div>
+
+    <div class="mt-6 analytics-grid">
+      <div class="card">
+        <div class="small-muted">Sales Trend</div>
+        <div class="chart-placeholder">[Line chart placeholder]</div>
+      </div>
+      <div class="card">
+        <div class="small-muted">Top Brands</div>
+        <div class="chart-placeholder">[Bar chart placeholder]</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

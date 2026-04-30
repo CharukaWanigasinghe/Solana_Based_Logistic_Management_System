@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+
+{% block title %}Blockchain Shipment Tracking - INTELLICA{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+  <h2>Blockchain-Based Shipment Tracking</h2>
+  <p>Track shipments on-chain with hybrid storage (on-chain critical data + off-chain details)</p>
+  
+  <!-- Wallet Status -->
+  <div id="wallet-status" class="mt-6 mb-6"></div>
+  
+  <!-- Create Shipment -->
+  <div class="section mb-8">
+    <h3 class="text-xl font-bold text-primary mb-4">📦 Create Shipment</h3>
+    <form id="createShipmentForm" class="space-y-4">
+      <div class="form-group">
+        <label for="shipmentId">Shipment ID:</label>
+        <input type="text" id="shipmentId" name="shipmentId" required placeholder="e.g., SHIP-001" />
+      </div>
+      
+      <div class="form-group">
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" name="destination" required placeholder="e.g., Manhattan, NY" />
+      </div>
+      
+      <div class="form-group">
+        <label for="productLine">Product Line:</label>
+        <input type="text" id="productLine" name="productLine" required placeholder="e.g., Electronics" />
+      </div>
+      
+      <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required min="1" placeholder="e.g., 50" />
+      </div>
+      
+      <div class="form-group">
+        <label for="latitude">Latitude:</label>
+        <input type="number" id="latitude" name="latitude" step="0.0001" placeholder="e.g., 40.7128" />
+      </div>
+      
+      <div class="form-group">
+        <label for="longitude">Longitude:</label>
+        <input type="number" id="longitude" name="longitude" step="0.0001" placeholder="e.g., -74.0060" />
+      </div>
+      
+      <button type="submit" class="generate-btn">Create & Deploy to Blockchain</button>
+    </form>
+    <div id="createResponse" class="mt-4"></div>
+  </div>
+
+  <!-- Log Tracking Event -->
+  <div class="section mb-8">
+    <h3 class="text-xl font-bold text-primary mb-4">📍 Log Tracking Event</h3>
+    <form id="trackingEventForm" class="space-y-4">
+      <div class="form-group">
+        <label for="trackShipmentId">Shipment ID:</label>
+        <input type="text" id="trackShipmentId" name="trackShipmentId" required placeholder="e.g., SHIP-001" />
+      </div>
+      
+      <div class="form-group">
+        <label for="eventType">Event Type:</label>
+        <select id="eventType" name="eventType" required>
+          <option value="pickup">📤 Pickup</option>
+          <option value="in_transit">🚚 In Transit</option>
+          <option value="delivery">📬 Delivery</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required placeholder="e.g., Distribution Center NYC" />
+      </div>
+      
+      <div class="form-group">
+        <label for="eventLatitude">Current Latitude:</label>
+        <input type="number" id="eventLatitude" name="eventLatitude" step="0.0001" placeholder="e.g., 40.7128" />
+      </div>
+      
+      <div class="form-group">
+        <label for="eventLongitude">Current Longitude:</label>
+        <input type="number" id="eventLongitude" name="eventLongitude" step="0.0001" placeholder="e.g., -74.0060" />
+      </div>
+      
+      <div class="form-group">
+        <label for="temperature">Temperature (°C):</label>
+        <input type="number" id="temperature" name="temperature" step="0.1" placeholder="e.g., 22.5" />
+      </div>
+      
+      <div class="form-group">
+        <label for="humidity">Humidity (%):</label>
+        <input type="number" id="humidity" name="humidity" min="0" max="100" placeholder="e.g., 65" />
+      </div>
+      
+      <button type="submit" class="generate-btn">Log Event On-Chain</button>
+    </form>
+    <div id="trackingResponse" class="mt-4"></div>
+  </div>
+
+  <!-- Confirm Delivery -->
+  <div class="section mb-8">
+    <h3 class="text-xl font-bold text-primary mb-4">✅ Confirm Delivery</h3>
+    <form id="deliveryForm" class="space-y-4">
+      <div class="form-group">
+        <label for="deliveryShipmentId">Shipment ID:</label>
+        <input type="text" id="deliveryShipmentId" name="deliveryShipmentId" required placeholder="e.g., SHIP-001" />
+      </div>
+      
+      <div class="form-group">
+        <label for="recipientName">Recipient Name:</label>
+        <input type="text" id="recipientName" name="recipientName" required placeholder="e.g., John Doe" />
+      </div>
+      
+      <div class="form-group">
+        <label for="signature">Signature (Base64):</label>
+        <textarea id="signature" name="signature" rows="3" placeholder="Recipient signature data" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="photoHash">Delivery Photo Hash (IPFS):</label>
+        <input type="text" id="photoHash" name="photoHash" placeholder="QmX..." />
+      </div>
+      
+      <button type="submit" class="generate-btn">Confirm Delivery</button>
+    </form>
+    <div id="deliveryResponse" class="mt-4"></div>
+  </div>
+
+  <!-- View Tracking History -->
+  <div class="section mb-8">
+    <h3 class="text-xl font-bold text-primary mb-4">📊 Tracking History</h3>
+    <form id="historyForm" class="space-y-4">
+      <div class="form-group">
+        <label for="historyShipmentId">Shipment ID:</label>
+        <input type="text" id="historyShipmentId" name="historyShipmentId" required placeholder="e.g., SHIP-001" />
+      </div>
+      
+      <button type="submit" class="generate-btn">Load History</button>
+    </form>
+    <div id="historyResponse" class="mt-4"></div>
+  </div>
+
+  <!-- Verify GPS Data -->
+  <div class="section mb-8">
+    <h3 class="text-xl font-bold text-primary mb-4">🔐 Verify GPS Integrity</h3>
+    <form id="verifyForm" class="space-y-4">
+      <div class="form-group">
+        <label for="verifyShipmentId">Shipment ID:</label>
+        <input type="text" id="verifyShipmentId" name="verifyShipmentId" required placeholder="e.g., SHIP-001" />
+      </div>
+      
+      <div class="form-group">
+        <label for="verifyLatitude">Latitude:</label>
+        <input type="number" id="verifyLatitude" name="verifyLatitude" step="0.0001" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="verifyLongitude">Longitude:</label>
+        <input type="number" id="verifyLongitude" name="verifyLongitude" step="0.0001" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="verifyTimestamp">Timestamp (seconds):</label>
+        <input type="number" id="verifyTimestamp" name="verifyTimestamp" required />
+      </div>
+      
+      <button type="submit" class="generate-btn">Verify Data</button>
+    </form>
+    <div id="verifyResponse" class="mt-4"></div>
+  </div>
+
+  <!-- Hybrid Storage Model Info -->
+  <div class="section bg-blue-900 text-blue-100 p-6 rounded-lg">
+    <h3 class="text-lg font-bold mb-3">🔗 Hybrid Storage Model</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <h4 class="font-bold mb-2">ON-CHAIN (Solana)</h4>
+        <ul class="list-disc ml-4 space-y-1">
+          <li>Shipment creation</li>
+          <li>Status changes</li>
+          <li>Event references</li>
+          <li>Hash verification</li>
+          <li>Delivery confirmation</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-2">OFF-CHAIN (IPFS)</h4>
+        <ul class="list-disc ml-4 space-y-1">
+          <li>GPS sequences</li>
+          <li>Temperature logs</li>
+          <li>Humidity readings</li>
+          <li>Delivery photos</li>
+          <li>Signatures</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .section {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    margin-bottom: 0.5rem;
+    color: #cbd5e1;
+    font-weight: bold;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background-color: #0f172a;
+    color: #e5e7eb;
+    border: 1px solid #6366f1;
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-family: 'Aptos', sans-serif;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #a5b4fc;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+  }
+
+  #createResponse,
+  #trackingResponse,
+  #deliveryResponse,
+  #historyResponse,
+  #verifyResponse {
+    padding: 1rem;
+    border-radius: 4px;
+    background: #1e293b;
+  }
+
+  .success {
+    background: #064e3b;
+    border: 1px solid #10b981;
+    color: #10b981;
+  }
+
+  .error {
+    background: #7f1d1d;
+    border: 1px solid #ef4444;
+    color: #fecaca;
+  }
+
+  .info {
+    background: #1e3a8a;
+    border: 1px solid #3b82f6;
+    color: #bfdbfe;
+  }
+</style>
+
+<script type="module">
+  import { blockchainManager, displayShipmentHistory } from "/static/js/blockchain-manager.js";
+
+  // Update wallet status on load
+  window.addEventListener('load', async () => {
+    try {
+      const statusEl = document.getElementById('wallet-status');
+      const status = await blockchainManager.getWalletStatus();
+      
+      if (status.connected) {
+        statusEl.innerHTML = `
+          <div class="success p-4 rounded-lg">
+            <p><strong>✓ Wallet Connected</strong></p>
+            <p>Address: ${status.publicKey.substring(0, 8)}...${status.publicKey.substring(-8)}</p>
+            <p>Balance: ${status.balance.toFixed(4)} SOL</p>
+            <p>Network: ${status.network}</p>
+          </div>
+        `;
+      } else {
+        statusEl.innerHTML = `
+          <div class="error p-4 rounded-lg">
+            <p><strong>✗ Wallet Not Connected</strong></p>
+            <p>Please connect your Phantom wallet to use blockchain features.</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Failed to check wallet:', error);
+    }
+  });
+
+  // Create Shipment Handler
+  document.getElementById('createShipmentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseEl = document.getElementById('createResponse');
+    responseEl.innerHTML = '<p class="info">Processing...</p>';
+
+    try {
+      const data = {
+        shipment_id: document.getElementById('shipmentId').value,
+        destination: document.getElementById('destination').value,
+        product_line: document.getElementById('productLine').value,
+        quantity: parseInt(document.getElementById('quantity').value),
+        latitude: parseFloat(document.getElementById('latitude').value) || 0,
+        longitude: parseFloat(document.getElementById('longitude').value) || 0
+      };
+
+      const result = await blockchainManager.createShipmentTransaction(data);
+      
+      // Store result in session and redirect to result page
+      const storeResponse = await fetch('/api/blockchain/store-shipment-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shipment_id: data.shipment_id,
+          destination: data.destination,
+          product_line: data.product_line,
+          quantity: data.quantity,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          gps_hash: result.gps_hash,
+          blockchain_instruction: result.blockchain_instruction,
+          blockchain_instruction_json: JSON.stringify(result.blockchain_instruction, null, 2)
+        })
+      });
+
+      if (storeResponse.ok) {
+        const redirectData = await storeResponse.json();
+        window.location.href = redirectData.redirect_url;
+      } else {
+        responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> Failed to process shipment result</div>`;
+      }
+    } catch (error) {
+      responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> ${error.message}</div>`;
+    }
+  });
+
+  // Log Tracking Event Handler
+  document.getElementById('trackingEventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseEl = document.getElementById('trackingResponse');
+    responseEl.innerHTML = '<p class="info">Processing...</p>';
+
+    try {
+      const shipmentId = document.getElementById('trackShipmentId').value;
+      const data = {
+        event_type: document.getElementById('eventType').value,
+        location: document.getElementById('location').value,
+        gps: {
+          latitude: parseFloat(document.getElementById('eventLatitude').value),
+          longitude: parseFloat(document.getElementById('eventLongitude').value)
+        },
+        temperature: parseFloat(document.getElementById('temperature').value) || null,
+        humidity: parseFloat(document.getElementById('humidity').value) || null
+      };
+
+      const result = await blockchainManager.logTrackingEvent(shipmentId, data);
+
+      // Store result in session and redirect to result page
+      const storeResponse = await fetch('/api/blockchain/store-event-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shipment_id: shipmentId,
+          event_type: data.event_type,
+          location: data.location,
+          latitude: data.gps.latitude,
+          longitude: data.gps.longitude,
+          temperature: data.temperature,
+          humidity: data.humidity,
+          event_hash: result.event_hash,
+          timestamp: new Date().toLocaleString(),
+          gps_hash: result.event_hash,
+          blockchain_instruction: result.blockchain_instruction,
+          blockchain_instruction_json: JSON.stringify(result.blockchain_instruction, null, 2)
+        })
+      });
+
+      if (storeResponse.ok) {
+        const redirectData = await storeResponse.json();
+        window.location.href = redirectData.redirect_url;
+      } else {
+        responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> Failed to process event result</div>`;
+      }
+    } catch (error) {
+      responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> ${error.message}</div>`;
+    }
+  });
+
+  // Confirm Delivery Handler
+  document.getElementById('deliveryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseEl = document.getElementById('deliveryResponse');
+    responseEl.innerHTML = '<p class="info">Processing...</p>';
+
+    try {
+      const shipmentId = document.getElementById('deliveryShipmentId').value;
+      const data = {
+        recipient_name: document.getElementById('recipientName').value,
+        signature: document.getElementById('signature').value,
+        photo_hash: document.getElementById('photoHash').value
+      };
+
+      const result = await blockchainManager.confirmDelivery(shipmentId, data);
+
+      // Store result in session and redirect to result page
+      const storeResponse = await fetch('/api/blockchain/store-delivery-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shipment_id: shipmentId,
+          recipient_name: data.recipient_name,
+          signature: data.signature,
+          photo_hash: data.photo_hash,
+          delivery_hash: result.delivery_hash,
+          timestamp: new Date().toLocaleString(),
+          blockchain_instruction: result.blockchain_instruction,
+          blockchain_instruction_json: JSON.stringify(result.blockchain_instruction, null, 2)
+        })
+      });
+
+      if (storeResponse.ok) {
+        const redirectData = await storeResponse.json();
+        window.location.href = redirectData.redirect_url;
+      } else {
+        responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> Failed to process delivery result</div>`;
+      }
+    } catch (error) {
+      responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> ${error.message}</div>`;
+    }
+  });
+
+  // View History Handler
+  document.getElementById('historyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseEl = document.getElementById('historyResponse');
+    responseEl.innerHTML = '<p class="info">Loading...</p>';
+
+    try {
+      const shipmentId = document.getElementById('historyShipmentId').value;
+      
+      // Fetch history data from the API
+      const historyResponse = await fetch(`/api/blockchain/shipments/${shipmentId}/history`);
+      if (!historyResponse.ok) {
+        throw new Error('Failed to fetch tracking history');
+      }
+      const historyData = await historyResponse.json();
+
+      // Format the data for the result page
+      const resultData = {
+        shipment_id: shipmentId,
+        events: historyData.events || [],
+        events_count: historyData.events_count || 0,
+        last_updated: new Date().toLocaleString(),
+        pickup_count: (historyData.events || []).filter(e => e.event_type === 'pickup').length,
+        transit_count: (historyData.events || []).filter(e => e.event_type === 'in_transit').length,
+        delivery_count: (historyData.events || []).filter(e => e.event_type === 'delivery').length,
+        current_status: historyData.events && historyData.events.length > 0 ? 'Tracked' : 'No events'
+      };
+
+      // Store result in session and redirect to result page
+      const storeResponse = await fetch('/api/blockchain/store-history-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resultData)
+      });
+
+      if (storeResponse.ok) {
+        const redirectData = await storeResponse.json();
+        window.location.href = redirectData.redirect_url;
+      } else {
+        responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> Failed to process history result</div>`;
+      }
+    } catch (error) {
+      responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> ${error.message}</div>`;
+    }
+  });
+
+  // Verify GPS Handler
+  document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const responseEl = document.getElementById('verifyResponse');
+    responseEl.innerHTML = '<p class="info">Verifying...</p>';
+
+    try {
+      const shipmentId = document.getElementById('verifyShipmentId').value;
+      const latitude = parseFloat(document.getElementById('verifyLatitude').value);
+      const longitude = parseFloat(document.getElementById('verifyLongitude').value);
+      const timestamp = parseInt(document.getElementById('verifyTimestamp').value);
+
+      const result = await blockchainManager.verifyGPSData(
+        shipmentId,
+        latitude,
+        longitude,
+        timestamp
+      );
+
+      // Store result in session and redirect to result page
+      const storeResponse = await fetch('/api/blockchain/store-gps-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shipment_id: shipmentId,
+          latitude: latitude,
+          longitude: longitude,
+          verification_timestamp: timestamp,
+          integrity_verified: result.integrity_verified,
+          message: result.message,
+          timestamp: new Date().toLocaleString()
+        })
+      });
+
+      if (storeResponse.ok) {
+        const redirectData = await storeResponse.json();
+        window.location.href = redirectData.redirect_url;
+      } else {
+        responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> Failed to process GPS verification result</div>`;
+      }
+    } catch (error) {
+      responseEl.innerHTML = `<div class="error"><strong>✗ Error:</strong> ${error.message}</div>`;
+    }
+  });
+</script>
+
+{% endblock %}

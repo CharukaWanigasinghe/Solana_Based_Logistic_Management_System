@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Select Customer - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section>
+  <div class="card">
+    <h1 class="hero-title">Select Customer</h1>
+    <p class="hero-sub">Choose a customer (Debname) to generate forecast</p>
+    <div class="mt-6 card">
+      <table class="customers-table">
+        <thead>
+          <tr><th>Customer Name</th><th>Items</th><th>Days</th><th>Total Quantity</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for c in customers %}
+          <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ c.items }}</td>
+            <td>{{ c.days }}</td>
+            <td>{{ c.total }}</td>
+            <td><a class="primary-btn" href="/ui/agentic?customer={{ c.name }}">AI Agent</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

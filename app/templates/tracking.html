@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Real-time Delivery Tracking - B To B INTELLICA{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-6xl space-y-6">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-white mb-2">Real-time Delivery Tracking</h2>
+            <p class="text-slate-300">Track the real-time delivery of goods using the map below.</p>
+        </div>
+
+        <div id="map" class="h-96 w-full border border-primary rounded-lg shadow-lg"></div>
+
+        <div class="bg-slate-800 bg-opacity-90 rounded-lg p-6 shadow-lg">
+            <h3 class="text-xl font-bold text-white mb-4">Current Delivery Status</h3>
+            <p id="status" class="text-slate-300 mb-4">Loading delivery information...</p>
+
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button id="getLocationBtn" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">Get My Location</button>
+                <button id="startTrackingBtn" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">Start GPS Tracking</button>
+                <button id="stopTrackingBtn" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200 disabled:opacity-50" disabled>Stop Tracking</button>
+            </div>
+
+            <div id="locationInfo" class="bg-slate-700 rounded-lg p-4 mb-6">
+                <p class="text-slate-200"><strong>Current Location:</strong> <span id="currentLocation" class="text-slate-300">Not available</span></p>
+                <p class="text-slate-200"><strong>Accuracy:</strong> <span id="accuracy" class="text-slate-300">N/A</span></p>
+            </div>
+
+            <div class="recent-deliveries">
+                <h4 class="text-lg font-bold text-white mb-4">Recent Deliveries</h4>
+                <div class="overflow-x-auto bg-slate-700 rounded-lg">
+                    <table id="deliveries-table" class="w-full text-sm">
+                        <thead class="bg-slate-600">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Date</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Time</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Invoice ID</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Branch</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Product Line</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Quantity</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Sales</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-600">
+                            {% for delivery in initial_deliveries %}
+                            <tr class="hover:bg-slate-600">
+                                <td class="px-4 py-3 text-slate-300">{{ delivery.Date }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ delivery.Time }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ delivery['Invoice ID'] }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ delivery.Branch }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ delivery['Product line'] }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ delivery.Quantity }}</td>
+                                <td class="px-4 py-3 text-slate-300">${{ "%.2f"|format(delivery.Sales) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button id="loadMoreBtn" class="mt-4 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">Find More Deliveries</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([16.8409, 96.1735], 6); // Default to Myanmar (Yangon area)
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add markers for branches
+    var branches = [
+        {name: 'Alex', lat: 16.8409, lng: 96.1735, city: 'Yangon'},
+        {name: 'Cairo', lat: 30.0444, lng: 31.2357, city: 'Cairo'},
+        {name: 'Giza', lat: 30.0131, lng: 31.2089, city: 'Giza'}
+    ];
+
+    branches.forEach(function(branch) {
+        L.marker([branch.lat, branch.lng]).addTo(map)
+            .bindPopup(branch.name + ' Branch - ' + branch.city)
+            .openPopup();
+    });
+
+    // GPS functionality
+    let userMarker = null;
+    let watchId = null;
+    let trackingPath = [];
+    let pathLine = null;
+
+    // Get current location once
+    document.getElementById('getLocationBtn').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    });
+
+    // Start continuous tracking
+    document.getElementById('startTrackingBtn').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(showPosition, showError, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 30000
+            });
+            this.disabled = true;
+            document.getElementById('stopTrackingBtn').disabled = false;
+            document.getElementById('status').innerText = 'GPS tracking started...';
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    });
+
+    // Stop tracking
+    document.getElementById('stopTrackingBtn').addEventListener('click', function() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+        this.disabled = true;
+        document.getElementById('startTrackingBtn').disabled = false;
+        document.getElementById('status').innerText = 'GPS tracking stopped.';
+    });
+
+    function showPosition(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        // Update location info
+        document.getElementById('currentLocation').innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('accuracy').innerText = `${accuracy.toFixed(1)} meters`;
+
+        // Update or create user marker
+        if (userMarker) {
+            userMarker.setLatLng([lat, lng]);
+        } else {
+            userMarker = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map)
+            .bindPopup('Your Location')
+            .openPopup();
+        }
+
+        // Center map on user location
+        map.setView([lat, lng], 15);
+
+        // Track path for continuous tracking
+        if (watchId) {
+            trackingPath.push([lat, lng]);
+            
+            // Update path line
+            if (pathLine) {
+                pathLine.setLatLngs(trackingPath);
+            } else {
+                pathLine = L.polyline(trackingPath, {color: 'blue', weight: 3, opacity: 0.7}).addTo(map);
+            }
+        }
+
+        document.getElementById('status').innerText = 'Location updated successfully!';
+    }
+
+    function showError(error) {
+        let errorMessage = '';
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = "User denied the request for Geolocation.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                errorMessage = "The request to get user location timed out.";
+                break;
+            case error.UNKNOWN_ERROR:
+                errorMessage = "An unknown error occurred.";
+                break;
+        }
+        document.getElementById('status').innerText = 'Error: ' + errorMessage;
+        alert('GPS Error: ' + errorMessage);
+    }
+
+    // Simulate real-time updates
+    setInterval(function() {
+        if (!watchId) {
+            document.getElementById('status').innerText = 'Active deliveries in progress across all branches.';
+        }
+    }, 5000);
+
+    // Load recent deliveries
+    let offset = 3;  // Start after the initial 3 loaded server-side
+    const initialLimit = 3;
+    const loadMoreLimit = 20;
+
+    function loadDeliveries(isLoadMore = false) {
+        const currentLimit = isLoadMore ? loadMoreLimit : initialLimit;
+        fetch(`/api/deliveries/recent?limit=${currentLimit}&offset=${offset}`)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.querySelector('#deliveries-table tbody');
+                data.deliveries.forEach(delivery => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${delivery.Date}</td>
+                        <td>${delivery.Time}</td>
+                        <td>${delivery['Invoice ID']}</td>
+                        <td>${delivery.Branch}</td>
+                        <td>${delivery['Product line']}</td>
+                        <td>${delivery.Quantity}</td>
+                        <td>$${delivery.Sales.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error loading deliveries:', error));
+    }
+
+    // Load more deliveries button (no initial load since data is loaded server-side)
+    document.getElementById('loadMoreBtn').addEventListener('click', function() {
+        loadDeliveries(true);
+        offset += loadMoreLimit;
+    });
+</script>
+{% endblock %}

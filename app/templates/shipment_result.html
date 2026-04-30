@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Shipment Created - INTELLICA{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+  <div class="section">
+    <div class="flex items-center justify-center mb-4">
+      <h2 class="text-3xl font-bold text-primary">✅ Shipment Created Successfully</h2>
+    </div>
+    
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-green-500">
+      <h3 class="text-xl font-bold text-green-400 mb-4">📦 Shipment Details</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-200">
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Shipment ID:</label>
+          <p class="text-lg font-bold text-primary">{{ shipment_data.get('shipment_id', 'N/A') }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Destination:</label>
+          <p class="text-lg font-bold text-accent">{{ shipment_data.get('destination', 'N/A') }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Product Line:</label>
+          <p class="text-lg font-bold text-secondary">{{ shipment_data.get('product_line', 'N/A') }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Quantity:</label>
+          <p class="text-lg font-bold text-warning">{{ shipment_data.get('quantity', 'N/A') }} units</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Initial Latitude:</label>
+          <p class="text-lg font-bold">{{ "%.4f"|format(shipment_data.get('latitude', 0)) }}</p>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4">
+          <label class="text-sm text-slate-400">Initial Longitude:</label>
+          <p class="text-lg font-bold">{{ "%.4f"|format(shipment_data.get('longitude', 0)) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPS Hash Information -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-blue-500">
+      <h3 class="text-xl font-bold text-blue-400 mb-4">🔐 GPS Hash Verification</h3>
+      
+      {% if shipment_data.get('gps_hash') %}
+        <div class="bg-slate-800 rounded p-4 mb-4">
+          <label class="text-sm text-slate-400">GPS Data Hash:</label>
+          <p class="text-sm font-mono text-green-300 break-all">{{ shipment_data.get('gps_hash') }}</p>
+        </div>
+      {% endif %}
+      
+      <div class="bg-blue-900 text-blue-100 rounded p-4">
+        <p class="text-sm mb-2"><strong>✓ Hash Verification:</strong> GPS location data has been securely hashed and will be stored on blockchain</p>
+        <p class="text-sm"><strong>Security:</strong> This hash ensures the integrity of the GPS coordinates throughout the shipment journey</p>
+      </div>
+    </div>
+
+    <!-- Blockchain Instruction -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-purple-500">
+      <h3 class="text-xl font-bold text-purple-400 mb-4">⛓️ Blockchain Instruction (Ready for Deployment)</h3>
+      
+      {% if shipment_data.get('blockchain_instruction') %}
+        <div class="bg-slate-900 rounded p-4 mb-4 overflow-x-auto">
+          <pre class="text-green-300 text-sm font-mono">{{ shipment_data.get('blockchain_instruction_json', 'N/A') }}</pre>
+        </div>
+      {% endif %}
+      
+      <div class="bg-purple-900 text-purple-100 rounded p-4">
+        <p class="text-sm mb-2"><strong>📝 Status:</strong> Transaction prepared and ready for deployment</p>
+        <p class="text-sm"><strong>Next Step:</strong> Use Phantom wallet to sign and deploy this transaction to the Solana blockchain</p>
+      </div>
+    </div>
+
+    <!-- Storage Model Information -->
+    <div class="bg-slate-700 rounded-lg p-6 mb-6 border border-indigo-500">
+      <h3 class="text-xl font-bold text-indigo-400 mb-4">💾 Hybrid Storage Model</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-green-500">
+          <h4 class="font-bold text-green-400 mb-2">ON-CHAIN (Solana)</h4>
+          <ul class="text-sm text-slate-300 space-y-1">
+            <li>✓ Shipment ID & creation timestamp</li>
+            <li>✓ GPS hash for integrity verification</li>
+            <li>✓ Status tracking information</li>
+            <li>✓ Immutable audit trail</li>
+          </ul>
+        </div>
+        
+        <div class="bg-slate-800 rounded p-4 border-l-4 border-blue-500">
+          <h4 class="font-bold text-blue-400 mb-2">OFF-CHAIN (IPFS/Arweave)</h4>
+          <ul class="text-sm text-slate-300 space-y-1">
+            <li>• Detailed GPS sequences</li>
+            <li>• Environmental sensor data</li>
+            <li>• High-resolution delivery photos</li>
+            <li>• Complete shipment manifest</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-4">
+      <a href="/blockchain/tracking" class="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">
+        ← Back to Dashboard
+      </a>
+      <a href="/blockchain/tracking" class="px-6 py-3 bg-secondary hover:bg-green-600 text-white rounded-lg font-semibold transition-colors duration-200">
+        Create Another Shipment
+      </a>
+      <a href="/blockchain/tracking-history-result" class="px-6 py-3 bg-accent hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200">
+        View Tracking History
+      </a>
+    </div>
+
+    <!-- Additional Info Box -->
+    <div class="mt-6 bg-slate-900 border-l-4 border-yellow-500 rounded p-6">
+      <h4 class="font-bold text-yellow-400 mb-2">⚠️ Important Information</h4>
+      <ul class="text-sm text-slate-300 space-y-2">
+        <li><strong>Data Persistence:</strong> This shipment record will remain permanently on the Solana blockchain</li>
+        <li><strong>Gas Fees:</strong> Blockchain deployment requires SOL tokens for transaction fees</li>
+        <li><strong>Wallet Required:</strong> Transaction must be signed with your connected Phantom wallet</li>
+        <li><strong>Network:</strong> Currently configured for Solana {{ 'Devnet' if 'devnet' in shipment_data.get('network', 'devnet').lower() else 'Mainnet' }}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .welcome-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .section {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .section {
+      padding: 1rem;
+    }
+
+    .welcome-container {
+      margin: 1rem auto;
+    }
+  }
+</style>
+
+<script>
+  // Display blockchain instruction if available
+  document.addEventListener('DOMContentLoaded', function() {
+    const instructionJson = {{ shipment_data.get('blockchain_instruction_json', 'null') | safe }};
+    if (instructionJson && typeof instructionJson === 'object') {
+      const preElement = document.querySelector('pre');
+      if (preElement) {
+        preElement.textContent = JSON.stringify(instructionJson, null, 2);
+      }
+    }
+  });
+</script>
+
+{% endblock %}

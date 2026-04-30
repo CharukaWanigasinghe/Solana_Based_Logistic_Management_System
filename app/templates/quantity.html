@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Quantity Confirmation - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-6xl space-y-6">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-white mb-2">Quantity Confirmation</h2>
+            <p class="text-slate-300">Verify the quantity for each invoice ID from the dataset.</p>
+        </div>
+
+        <div class="bg-slate-800 bg-opacity-90 rounded-lg p-6 shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label for="search" class="block text-sm font-semibold text-slate-200 mb-2">Search Invoice ID:</label>
+                    <input type="text" id="search" placeholder="Type to search..." class="w-full px-3 py-2 bg-slate-700 border border-primary rounded-lg text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <div>
+                    <label for="invoiceSelect" class="block text-sm font-semibold text-slate-200 mb-2">Select Invoice ID:</label>
+                    <select id="invoiceSelect" class="w-full px-3 py-2 bg-slate-700 border border-primary rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="" class="bg-slate-700">-- Select Invoice ID --</option>
+                        {% for invoice_id in invoice_ids %}
+                        <option value="{{ invoice_id }}" class="bg-slate-700">{{ invoice_id }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="productLineSelect" class="block text-sm font-semibold text-slate-200 mb-2">Select Product Line:</label>
+                    <select id="productLineSelect" class="w-full px-3 py-2 bg-slate-700 border border-primary rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="" class="bg-slate-700">-- Select Product Line --</option>
+                        {% for productline in productlines %}
+                        <option value="{{ productline }}" class="bg-slate-700">{{ productline }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div id="quantityDisplay" class="bg-slate-700 rounded-lg p-4 mb-6">
+                <p class="text-slate-300">Select a product line or invoice ID to view quantities.</p>
+            </div>
+
+            <div class="all-quantities">
+                <h3 class="text-xl font-bold text-white mb-4">All Invoice Quantities</h3>
+                <div class="overflow-x-auto bg-slate-700 rounded-lg">
+                    <table id="quantitiesTable" class="w-full text-sm">
+                        <thead class="bg-slate-600">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Invoice ID</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Quantity</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Product Line</th>
+                                <th class="px-4 py-3 text-left text-white font-semibold">Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-600">
+                            <!-- Data will be loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get data from server
+    let allData = [];
+    
+    // Load all quantities on page load
+    fetch('/api/quantities/all')
+        .then(response => response.json())
+        .then(data => {
+            allData = data.quantities;
+            displayAllQuantities(allData);
+        })
+        .catch(error => console.error('Error loading quantities:', error));
+
+    // Search functionality
+    document.getElementById('search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let filtered = allData;
+        
+        // First apply product line filter if selected
+        const selectedProductLine = document.getElementById('productLineSelect').value;
+        if (selectedProductLine) {
+            filtered = allData.filter(item => item['Product line'] === selectedProductLine);
+        }
+        
+        // Then apply search filter
+        if (searchTerm) {
+            filtered = filtered.filter(item => 
+                item['Invoice ID'].toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        displayAllQuantities(filtered);
+        
+        // Update dropdown options
+        updateDropdown(filtered.map(item => item['Invoice ID']));
+    });
+
+    // Dropdown selection for Invoice ID
+    document.getElementById('invoiceSelect').addEventListener('change', function() {
+        const selectedId = this.value;
+        if (selectedId) {
+            const item = allData.find(item => item['Invoice ID'] === selectedId);
+            if (item) {
+                document.getElementById('quantityDisplay').innerHTML = `
+                    <h4>Quantity for Invoice ${selectedId}:</h4>
+                    <p><strong>Quantity:</strong> ${item.Quantity}</p>
+                    <p><strong>Product Line:</strong> ${item['Product line']}</p>
+                    <p><strong>Branch:</strong> ${item.Branch}</p>
+                    <p><strong>Sales:</strong> $${item.Sales.toFixed(2)}</p>
+                `;
+            }
+        } else {
+            document.getElementById('quantityDisplay').innerHTML = '<p>Select an invoice ID to view its quantity.</p>';
+        }
+    });
+
+    // Dropdown selection for Product Line
+    document.getElementById('productLineSelect').addEventListener('change', function() {
+        const selectedProductLine = this.value;
+        let filtered = allData;
+        
+        // Apply product line filter
+        if (selectedProductLine) {
+            filtered = allData.filter(item => item['Product line'] === selectedProductLine);
+            // Clear search input when product line is selected
+            document.getElementById('search').value = '';
+        }
+        
+        displayAllQuantities(filtered);
+        
+        // Update invoice dropdown options based on filtered data
+        updateDropdown(filtered.map(item => item['Invoice ID']));
+        
+        // Update quantity display message
+        if (selectedProductLine) {
+            document.getElementById('quantityDisplay').innerHTML = `<p>Showing all invoice IDs for <strong>${selectedProductLine}</strong> product line.</p>`;
+        } else {
+            document.getElementById('quantityDisplay').innerHTML = '<p>Select a product line or invoice ID to view quantities.</p>';
+        }
+    });
+
+    function displayAllQuantities(data) {
+        const tbody = document.querySelector('#quantitiesTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item['Invoice ID']}</td>
+                <td>${item.Quantity}</td>
+                <td>${item['Product line']}</td>
+                <td>${item.Branch}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function updateDropdown(invoiceIds) {
+        const select = document.getElementById('invoiceSelect');
+        select.innerHTML = '<option value="">-- Select Invoice ID --</option>';
+        invoiceIds.forEach(id => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = id;
+            select.appendChild(option);
+        });
+    }
+</script>
+
+{% endblock %}
+<parameter name="filePath">c:\Users\acer\Documents\SLIIT UNI\Research Related\PP1\Solana Based Logistic Management System\app\templates\quantity.html

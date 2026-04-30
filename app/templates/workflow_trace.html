@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Workflow Trace - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section>
+  <div class="card">
+    <h1 class="hero-title">Workflow Trace</h1>
+    <p class="hero-sub">Visual representation of workflow execution steps</p>
+    <div class="mt-6 timeline">
+      <div class="event card">
+        <div class="text-sm small-muted">Planning</div>
+        <div class="font-semibold">Routing Mode: reg_only</div>
+      </div>
+      <div class="event card">
+        <div class="text-sm small-muted">Forecasting</div>
+        <div class="font-semibold">Run ID: 6105e74a...</div>
+      </div>
+      <div class="event card">
+        <div class="text-sm small-muted">Explaining</div>
+        <div class="font-semibold">Top Items: 50 | Total Forecast: 255.843</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

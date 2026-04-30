@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Agentic AI Forecast - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section>
+  <div class="card">
+    <h1 class="hero-title">Agentic AI Forecast</h1>
+    <p class="hero-sub">Autonomous agent with LLM-powered explanations</p>
+    <div class="mt-6 grid grid-cols-3 gap-6">
+      <div class="card pipeline-step">
+        <div class="text-sm small-muted">Planning</div>
+        <div class="mt-2">Analyzing data and selecting routing mode</div>
+        <div class="mt-4"><span class="muted-btn">Processing...</span></div>
+      </div>
+      <div class="card pipeline-step">
+        <div class="text-sm small-muted">Forecasting</div>
+        <div class="mt-2">Running ML prediction models</div>
+      </div>
+      <div class="card pipeline-step">
+        <div class="text-sm small-muted">Explaining</div>
+        <div class="mt-2">Analyzing SHAP drivers and evidence</div>
+      </div>
+    </div>
+    <div class="mt-6 card">
+      <h3 class="font-semibold">Agent Run Complete</h3>
+      <div class="mt-3 grid grid-cols-3 gap-4">
+        <div class="card small-muted">Run ID<br/><strong>6105e74a...</strong></div>
+        <div class="card small-muted">Mode<br/><strong>reg_only</strong></div>
+        <div class="card small-muted">Items Forecast<br/><strong>35</strong></div>
+      </div>
+    </div>
+    <div class="mt-6 card">
+      <h3 class="font-semibold">AI-Generated Explanation</h3>
+      <pre class="small-muted" style="white-space:pre-wrap">- Summary: Predicted demand for next month shows a significant change...</pre>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Data - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section class="mb-8">
+  <div class="card">
+    <h1 class="hero-title">Upload Your Sales Data</h1>
+    <p class="hero-sub">Please upload your business sales data in CSV or Excel format. Minimum 3 months of data.</p>
+    <div class="mt-8 upload-box">
+      <div>
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" class="mx-auto mb-4"><path d="M12 3v9" stroke="rgba(255,255,255,0.6)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="rgba(255,255,255,0.6)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3 class="text-lg font-semibold">Click to upload or drag and drop</h3>
+        <p class="muted">CSV or Excel (.xlsx) file — max 50MB</p>
+        <div class="mt-6">
+          <button class="primary-btn">Select File</button>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 text-sm small-muted">Required Columns: TxnDate, Debname, Itemcode, Qty</div>
+  </div>
+</section>
+{% endblock %}

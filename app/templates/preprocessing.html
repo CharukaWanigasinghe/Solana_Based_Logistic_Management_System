@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Preprocessing Pipeline - B To B INTELLICA{% endblock %}
+
+{% block content %}
+<section>
+  <div class="card">
+    <h1 class="hero-title">Preprocessing Pipeline</h1>
+    <p class="hero-sub">Your data is flowing through our advanced analytics pipeline</p>
+    <div class="mt-6 grid grid-cols-3 gap-6">
+      <div class="card">
+        <div class="text-sm small-muted">Records</div>
+        <div class="text-2xl font-bold mt-2">200</div>
+      </div>
+      <div class="card">
+        <div class="text-sm small-muted">Progress</div>
+        <div class="text-2xl font-bold mt-2">0%</div>
+      </div>
+      <div class="card">
+        <div class="text-sm small-muted">Elapsed</div>
+        <div class="text-2xl font-bold mt-2">00:04</div>
+      </div>
+    </div>
+
+    <div class="mt-8 pipeline-grid">
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">1</div>
+        <h3 class="font-semibold mt-2">Validation</h3>
+        <p class="small-muted mt-2">Validating dataset schema and data quality</p>
+      </div>
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">2</div>
+        <h3 class="font-semibold mt-2">Aggregation</h3>
+        <p class="small-muted mt-2">Aggregating line-level data to daily series</p>
+      </div>
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">3</div>
+        <h3 class="font-semibold mt-2">Customer Explorer</h3>
+        <p class="small-muted mt-2">Discovering customer profiles</p>
+      </div>
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">4</div>
+        <h3 class="font-semibold mt-2">Build Series</h3>
+      </div>
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">5</div>
+        <h3 class="font-semibold mt-2">Build Features</h3>
+      </div>
+      <div class="pipeline-step card">
+        <div class="text-sm small-muted">6</div>
+        <h3 class="font-semibold mt-2">Segmentation</h3>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <div class="card">
+        <div class="small-muted">Overall Pipeline Progress</div>
+        <div class="mt-3" style="height:10px; background:rgba(255,255,255,0.03); border-radius:8px"><div style="width:0%;height:100%;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));border-radius:8px"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
